@@ -1,5 +1,5 @@
 {
-  "name": "@smile/create-project",
+  "name": "smile-cli",
   "version": "1.0.0",
   "description": "smile创建自己的脚手架",
   "main": "index.js",

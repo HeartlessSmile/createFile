@@ -153,7 +153,17 @@ async function init() {
   if (hasApi) {
     const apiPath = path.join(templateRoot, 'api.js')
     let apiName = humpFileName + 'Api'
-    fs.copyFile(apiPath, path.join(filePath, midApiPath, apiName + '.js'), (err) => {})
+    fs.copyFileSync(apiPath, path.join(filePath, midApiPath, apiName + '.js'))
+
+    // 读取api文件重写  判断引入位置
+    if (midProjectPath == 'components/declare-back' || midProjectPath == 'components/tax-file') {
+      let apiPath = path.join(filePath, midApiPath, apiName + '.js')
+      let apiContent = fs.readFileSync(apiPath, 'utf-8')
+      apiContent = apiContent.replace('import { base } from "../../static/globaljs/global.js";','import { base } from "../../../static/globaljs/global.js";')
+      fs.writeFileSync(apiPath, apiContent, 'utf-8')
+    } 
+
+
     let apiIndexPath = path.join(filePath, midApiPath, 'index.js')
     let apiIndexContent = fs.readFileSync(apiIndexPath, 'utf-8')
     if (!apiIndexContent.includes(apiName)) {

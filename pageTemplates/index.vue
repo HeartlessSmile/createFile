@@ -15,138 +15,172 @@
   </PageSearchTable>
 </template>
 <script>
-import confirmDelete from '@/components/common-component/modal/confirm-delete'
-import PageSearchTable from '@/components/common-component/PageSearchTable/index'
-import { getApiAsync, dataTransferText } from '@/misc/baseDict'
-
+import confirmDelete from "@/components/common-component/modal/confirm-delete";
+import PageSearchTable from "@/components/common-component/PageSearchTable/index";
+import { getApiAsync, dataTransferText } from "@/misc/baseDict";
+import { operatorBtn } from "@/misc/operator-btn";
 export default {
-  name: '##fileName##',
+  name: "##fileName##",
   components: {
     PageSearchTable,
-    confirmDelete
+    confirmDelete,
   },
-  data () {
+  data() {
     return {
       compare_status: [],
       columnsTable: [
         {
-          type: 'selection',
-          width: '60',
-          fixed: 'left',
-          align: 'center'
+          type: "selection",
+          width: "60",
+          fixed: "left",
+          align: "center",
         },
         {
-          title: '税号',
-          key: 'orgTaxNum',
-          width: 200
+          title: "税号",
+          key: "orgTaxNum",
+          width: 200,
         },
         {
-          title: '比对状态',
-          key: 'status',
+          title: "比对状态",
+          key: "status",
           width: 150,
           render: (h, params) => {
-            var data = dataTransferText(this.compare_status_arr, params.row.status, 'compare_status')
-            return h('span', data)
-          }
-        }
+            var data = dataTransferText(
+              this.compare_status_arr,
+              params.row.status,
+              "compare_status"
+            );
+            return h("span", data);
+          },
+        },
+        {
+          title: "操作",
+          fixed: "right",
+          width: 120,
+          render: (h, params) => {
+            let arr = [];
+            arr.push(
+              h(
+                "a",
+                {
+                  attrs: {
+                    class: "vouchericon",
+                    title: "修改",
+                  },
+                  on: {
+                    click: () => {
+                      this.editInfo(params.row);
+                    },
+                  },
+                },
+                "查看详情"
+              )
+            );
+            return operatorBtn(arr, h);
+          },
+        },
       ],
       formValidate: {
-        orgCode: '',
-        status: '',
-        peroidStr: ''
+        orgCode: "",
+        status: "",
+        peroidStr: "",
       },
       searchList: [
         {
-          type: 'input',
-          label: '机构编码',
-          key: 'orgCode',
+          type: "input",
+          label: "机构编码",
+          key: "orgCode",
           label_hh: false,
-          placeholder: '请输入机构编码',
-          clearable: true
+          placeholder: "请输入机构编码",
+          clearable: true,
         },
         {
-          type: 'select',
-          label: '比对状态',
-          key: 'status',
+          type: "select",
+          label: "比对状态",
+          key: "status",
           label_hh: false,
-          placeholder: '请选择',
+          placeholder: "请选择",
           clearable: true,
           filterable: true,
           option: () => {
-            return this.compare_status_arr
-          }
+            return this.compare_status_arr;
+          },
         },
         {
-          type: 'date',
-          dateType: 'month',
-          label: '所属期',
-          key: 'peroidStr',
+          type: "date",
+          dateType: "month",
+          label: "所属期",
+          key: "peroidStr",
           label_hh: false,
-          placeholder: '请输入机构名称/税号',
-          clearable: true
-        }
+          placeholder: "请输入机构名称/税号",
+          clearable: true,
+        },
       ],
       condition: [
-        { f: 'orgCode', op: 'like', t: 's' },
-        { f: 'status', op: 'eq', t: 's' },
-        { f: 'peroidStr', op: 'like', t: 's' }
-      ]
-    }
+        { f: "orgCode", op: "like", t: "s" },
+        { f: "status", op: "eq", t: "s" },
+        { f: "peroidStr", op: "like", t: "s" },
+      ],
+      
+    };
   },
   methods: {
-    init () {
+    init() {
       const params = {
-        module: '##apiFileName##',
-        api: 'list',
+        module: "##apiFileName##",
+        api: "list",
         condition: this.condition,
-        params: {}
-      }
-      this.$refs.PageSearchTable.params = params
-      this.$refs.PageSearchTable.dataTableShow()
+        params: {},
+      };
+      this.$refs.PageSearchTable.params = params;
+      this.$refs.PageSearchTable.dataTableShow();
     },
-    openConfirmModal () {
-      let selectdata = this.$refs.PageSearchTable.getSelectData()
+    editInfo(row) {
+      console.log(row);
+    },
+    openConfirmModal() {
+      let selectdata = this.$refs.PageSearchTable.getSelectData();
       if (selectdata.length == 0) {
-        this.$Message.warning('请选择一条数据')
-        return false
+        this.$Message.warning("请选择一条数据");
+        return false;
       }
-      this.$refs.confirmDelModal.deleteconfirm = true
+      this.$refs.confirmDelModal.deleteconfirm = true;
     },
-    deleteData () {
+    deleteData() {
       let ids = this.$refs.PageSearchTable.getSelectData()
         .map((el) => el.id)
-        .toString()
+        .toString();
       this.$api.ledgerApi
         .small_micro_tax_free_subject({ ids })
         .then((res) => {
-          const { result, infos } = res.data
-          this.visible = false
-          if (result == 'success') {
-            this.$Message.success(infos)
-            this.$refs.confirmDelModal.deleteconfirm = false
-            this.$refs.PageSearchTable.dataTableShow('pagejump')
+          const { result, infos } = res.data;
+          this.visible = false;
+          if (result == "success") {
+            this.$Message.success(infos);
+            this.$refs.confirmDelModal.deleteconfirm = false;
+            this.$refs.PageSearchTable.dataTableShow("pagejump");
           } else {
-            this.$Message.error(infos)
+            this.$Message.error(infos);
           }
         })
         .catch((err) => {
-          console.log(err)
-        })
+          console.log(err);
+        });
     },
-    handleSuccess () {
-      this.$refs.PageSearchTable.dataTableShow('pagejump')
+    handleSuccess() {
+      this.$refs.PageSearchTable.dataTableShow("pagejump");
     },
-    getDict () {
-      let params = ['compare_status']
+    getDict() {
+      let params = ["compare_status"];
       getApiAsync(params.toString()).then((res) => {
-        this.compare_status_arr = res[params[0]]
-      })
-    }
+        this.compare_status_arr = res[params[0]];
+      });
+    },
   },
-  mounted () {
-    this.init()
-    this.getDict()
-  }
-}
+  mounted() {
+    this.init();
+    this.getDict();
+  },
+};
 </script>
 <style lang="scss" scoped></style>
